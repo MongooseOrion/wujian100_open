@@ -69,12 +69,16 @@ module wujian100_open_top(
   PAD_USI2_SCLK,
   PAD_USI2_SD0,
   PAD_USI2_SD1,
-  PIN_EHS,
+//  PIN_EHS,
+  clkin1,
+  pll_lock,
   PIN_ELS,
   POUT_EHS,
   POUT_ELS
 );
-input           PIN_EHS;               
+//input           PIN_EHS;               
+input           clkin1;
+output          pll_lock;
 input           PIN_ELS;               
 output          POUT_EHS;              
 output          POUT_ELS;              
@@ -548,6 +552,16 @@ wire            usi2_ioctl_sd1_out;
 wire            usi2_wic_intr;         
 wire            wdt_pmu_rst_b;         
 wire            wdt_wic_intr;          
+
+// Add PLL(Clocking wizard) so that generate 20MHz
+clk_wiz  x_clk_wiz (
+  .clkin1      (clkin1),        // input: 50MHz
+  .pll_lock    (pll_lock),      // output
+  .clkout0     (PIN_EHS)        // output: 20MHz
+);
+
+
+
 aou_top  x_aou_top (
   .apb1_gpio_psel_s5     (apb1_gpio_psel_s5    ),
   .apb1_pmu_psel_s15     (apb1_pmu_psel_s15    ),
