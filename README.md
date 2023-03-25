@@ -2,14 +2,23 @@
 
 该仓库是 [wujian100_open](https://github.com/T-head-Semi/wujian100_open) 的分支，旨在利用紫光 PDS 平台部署无剑 100 开源 RISC-V 处理器。原自述文件可[点此](README_old.md)查看。
 
-## 测试环境
+## 运行环境
+
   * Pango Design Suite Lite 2022.2
-  * PGL50H-6FBG484 芯片部件编号
+  * PGL50H-6FBG484 芯片，MES50HP 开发板
+
+## 先决条件
+
+  * CKLINK 调试器
+  * 12 针 PMOD 转 CKLINK 调试器排线
 
 ## 文件夹结构
+
+**请注意，下述文件夹的某些文件或内容相比原版已经发生删改，请自行查阅。**
+
 ```
     |--case               // 模块测试样例
-    |--doc                // 开发文档
+    |--doc                // 开发文档，包含本分支的开发文档
     |--fpga               // 配置 FPGA 所需的脚本文件，包括 xdc 等
     |--lib                // 仿真编译脚本，用于将Verilog或VHDL代码编译成仿真模型的脚本文件。该脚本文件包含了仿真器件的配置信息，例如仿真库的路径、编译选项、仿真时钟周期等
     |--regress            // 回归测试结果
@@ -21,6 +30,10 @@
     |--LICENSE
     |--README.md
 ```
+
+## 系统架构
+
+
 
 ## 对 RTL 代码的处理
 
@@ -39,3 +52,21 @@ clk_wiz  x_clk_wiz (
   .clkout0     (PIN_EHS)        // output: 20MHz
 );
 ```
+
+
+## 对输入输出端口的简单描述
+
+输入输出接口的描述可以从 `./fpga/xdc/XC7A200T3B.xdc` 中获得。这里我将大致借用 `./fpga/xdc/XC7A200T3B.xdc` 的管脚约束配置，实际的管脚约束说明可[点此](./doc/constraint.md)查看。
+
+  | 端口 | 作用 |
+  |---------------|-----------------------|
+  | PIN_EHS       |     全局输入时钟 25MHz  |
+  | PAD_MCURST    |     全局复位           |
+  | PAD_JTAG_TCLK |     JTAG               |
+  | PAD_JTAG_TMS  |     JTAG              |
+
+  * GPIO：32 个；
+  * PWM：13 个；
+  * USI：3 组；
+
+
