@@ -60,7 +60,7 @@ clk_wiz  x_clk_wiz (
 
   | 端口 | 作用 |
   |---------------|-----------------------|
-  | PIN_EHS       |     全局输入时钟 25MHz  |
+  | PIN_EHS       |     全局输入时钟 20MHz  |
   | PAD_MCURST    |     全局复位           |
   | PAD_JTAG_TCLK |     JTAG               |
   | PAD_JTAG_TMS  |     JTAG              |
@@ -69,4 +69,28 @@ clk_wiz  x_clk_wiz (
   * PWM：13 个；
   * USI：3 组；
 
+### 管脚约束的注意事项
 
+在 `XC7A200T3B.xdc` 中我们可以看到，由于 `PAD_JTAG_TCLK` 属于时钟信号，但未接入全局时钟信号网，因此需要添加指令：
+```
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets PAD_JTAG_TCLK]
+```
+以便实现（布局布线）时忽略检查该条网络。
+
+然而，PDS 并不支持 Vivado 的命令格式，并且经过测试，只添加网络 `PAD_JTAG_TCLK` 或报错提示的网络 `x_PAD_JTAG_TCLK.PAD`，并不会解决错误：
+```
+Place-0084: GLOBAL_CLOCK: the driver x_PAD_JTAG_TCLK.PAD_tri/opit_1 fixed at IOL_99_5 is unreasonable. Sub-optimal placement for a clock source and a clock buffer.
+```
+
+解决方案是，将整个 `PAD_JTAG_TCLK` 网络全部设置忽略，在 `.fdc` 文件中添加下述命令：
+```
+define_attribute {n:PAD_JTAG_TCLK} {PAP_CLOCK_DEDICATED_ROUTE} {FALSE} 
+define_attribute {n:x_PAD_JTAG_TCLK.PAD} {PAP_CLOCK_DEDICATED_ROUTE} {FALSE} 
+define_attribute {n:x_PAD_JTAG_TCLK.ID} {PAP_CLOCK_DEDICATED_ROUTE} {FALSE} 
+define_attribute {n:x_PAD_JTAG_TCLK.IEN} {PAP_CLOCK_DEDICATED_ROUTE} {FALSE} 
+define_attribute {n:x_PAD_JTAG_TCLK.N2} {PAP_CLOCK_DEDICATED_ROUTE} {FALSE} 
+define_attribute {n:x_PAD_JTAG_TCLK.N3} {PAP_CLOCK_DEDICATED_ROUTE} {FALSE} 
+define_attribute {n:x_PAD_JTAG_TCLK.OD} {PAP_CLOCK_DEDICATED_ROUTE} {FALSE} 
+define_attribute {n:x_PAD_JTAG_TCLK.OEN} {PAP_CLOCK_DEDICATED_ROUTE} {FALSE}
+```
+即可解决错误。
