@@ -12,9 +12,15 @@
 
 #include <stdio.h>
 
+extern void mdelay(uint32_t ms);
 int main(void)
 {
-    printf("Hello World!\n");
+	while(1)
+	{
+		printf("Hello World!\n");
+		mdelay(500);
+	}
+    
 
     return 0;
 }

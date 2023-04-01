@@ -10,7 +10,7 @@
 ## 先决条件
 
   * CKLINK 调试器
-  * 12 针 PMOD 转 CKLINK 调试器排线
+  * 能够连接 `TCK` 和 `TMS` 端口的排线
 
 ## 文件夹结构
 
@@ -19,8 +19,8 @@
 ```
     |--case               // 模块测试样例
     |--doc                // 开发文档，包含本分支的开发文档
-    |--fpga               // 配置 FPGA 所需的脚本文件，包括 xdc 等
-    |--lib                // 仿真编译脚本，用于将Verilog或VHDL代码编译成仿真模型的脚本文件。该脚本文件包含了仿真器件的配置信息，例如仿真库的路径、编译选项、仿真时钟周期等
+    |--fpga               // 配置 FPGA 所需的脚本文件，例如 xdc 等
+    |--lib                // 仿真编译脚本，用于将 Verilog 或 VHDL 代码编译成仿真模型的脚本文件。该脚本文件包含了仿真器件的配置信息，例如仿真库的路径、编译选项、仿真时钟周期等
     |--regress            // 回归测试结果
     |--sdk                // 软件开发工具包
     |--soc                // Soc RTL 代码
@@ -33,7 +33,68 @@
 
 ## 系统架构
 
+请注意，此处的模块名称仅作为架构解释用途，并不是实际的例化结构。请以 EDA 工具生成的例化模块结构为准。
 
+```
+// input 指占用的 MASTER 通道，output 指占用的 SLAVE 通道，inout 指双向通道
+
+|-- wujian100_open_top                      // 系统顶层
+  |-- x_clk_wiz                             // 时钟
+  |-- x_main_bus_top (from x_pdu_top)       // 一级总线（AHB）
+    |-- x_ahb_matrix_7_12_main              // 总线控制器，dec 表示矩阵解码，arb 表示矩阵仲裁，7 个 MASTER，12 个 SLAVE
+    |-- x_main_mdummy_top0                  // [input] Dummy0 Master 
+    |-- x_main_mdummy_top1                  // [input] Dummy1 Master 
+    |-- x_main_mdummy_top2                  // [input] Dummy2 Master 
+    |-- x_main_imemdummy_top0               // [output] Dummy IMEM
+    |-- x_main_dmemdummy_top0               // [output] Dummy DMEM  
+    |-- x_main_dummy_top0                   // [output] Dummy0
+    |-- x_main_dummy_top1                   // [output] Dummy1
+    |-- x_main_dummy_top2                   // [output] Dummy2
+    |-- x_main_dummy_top3                   // [output] Dummy3
+    |-- x_dmac_top                          // [inout] DMA
+    |-- x_cpu_top                           // [input2:0] CPU
+    |-- x_sms0_top (from x_retu_top)        // [output] DRAM0
+    |-- x_sms1_top (from x_retu_top)        // [output] DRAM1
+    |-- x_sms1_top (from x_retu_top)        // [output] DRAM2
+    |-- x_isram_top (from x_retu_top)       // [output] ISRAM
+    |-- x_sub_ls_top                        // [output] 二级总线
+  |-- x_sub_ls_top (from x_pdu_top)         // 二级总线（AHB）
+    |-- x_sub_ls_top                        // 总线控制器，1 个 MASTER，6 个 SLAVE
+    |-- x_lsbus_dummy_top0                  // [output] Dummy0
+    |-- x_lsbus_dummy_top1                  // [output] Dummy1
+    |-- x_lsbus_dummy_top2                  // [output] Dummy2
+    |-- x_lsbus_dummy_top3                  // [output] Dummy3
+    |-- x_main_bus_top                      // [input] 一级总线
+    |-- x_sub_apb0_top                      // [output] 三级总线编号 0
+    |-- x_sub_apb1_top                      // [output] 三级总线编号 1
+  |-- x_sub_apb0_top (from x_pdu_top)       // 三级总线 0（APB）
+    |-- x_apb0_sub_top                      // 总线控制
+    |-- x_tim0_sec_top                      // [] TIM0
+    |-- x_tim2_sec_top                      // [] TIM2
+    |-- x_tim4_sec_top                      // [] TIM4
+    |-- x_tim6_sec_top                      // [] TIM6
+    |-- x_usi0_sec_top                      // [] USI0
+    |-- x_usi2_sec_top                      // [] USI2
+    |-- x_wdt_sec_top                       // [] WDT
+    |-- x_pwm_sec_top                       // [] PWM
+    |-- x_apb0_dummy_top1                   // [] Dummy1
+    |-- x_apb0_dummy_top2                   // [] Dummy2
+    ...
+    |-- x_apb0_dummy_top9                   // [] Dummy9
+  |-- x_sub_apb1_top (from x_pdu_top)       // 三级总线 1（APB）
+    |-- x_apb1_sub_top                      // 总线控制
+    |-- x_tim1_sec_top                      // [] TIM1
+    |-- x_tim3_sec_top                      // [] TIM3
+    |-- x_tim5_sec_top                      // [] TIM5
+    |-- x_tim7_sec_top                      // [] TIM7
+    |-- x_usi1_sec_top                      // [] USI1
+    |-- x_apb0_dummy_top1                   // [] Dummy1
+    |-- x_apb0_dummy_top2                   // [] Dummy2
+    ...
+    |-- x_apb0_dummy_top8                   // [] Dummy8
+
+// 其中，Dummy 均为自定义模块的预留接口
+```
 
 ## 对 RTL 代码的处理
 
@@ -56,7 +117,7 @@ clk_wiz  x_clk_wiz (
 
 ## 对输入输出端口的简单描述
 
-输入输出接口的描述可以从 `./fpga/xdc/XC7A200T3B.xdc` 中获得。这里我将大致借用 `./fpga/xdc/XC7A200T3B.xdc` 的管脚约束配置，实际的管脚约束说明可[点此](./doc/constraint.md)查看。
+输入输出接口的描述可以从 `./fpga/xdc/XC7A200T3B.xdc` 中获得。这里我综合了 `./fpga/xdc/XC7A200T3B.xdc` 和 `./fpga/xdc/gensys2.xdc` 的管脚约束配置，实际的管脚约束说明可[点此](./doc/constraint.md)查看。
 
   | 端口 | 作用 |
   |---------------|-----------------------|
@@ -68,6 +129,8 @@ clk_wiz  x_clk_wiz (
   * GPIO：32 个；
   * PWM：13 个；
   * USI：3 组；
+
+在 `../doc/wujian100_open Userguide v1.0.docx` 中列出了各端口的定义，你需要按照一定规则约束端口，例如 `UART`。
 
 ### 管脚约束的注意事项
 

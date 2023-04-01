@@ -138,8 +138,8 @@
 
 | 端口 | 硬件管脚编号 | 对应位置 |
 | ------ | :--------: | ----------- |
-| PAD_USI0_SD0 | R9 | UART0_TX |
 | PAD_USI0_SCLK | R8 | UART0_RX |
+| PAD_USI0_SD0 | R9 | UART0_TX |
 
 ### 分配给 40 PIN 扩展接口
 
