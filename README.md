@@ -134,7 +134,7 @@ clk_wiz  x_clk_wiz (
 
 ### 管脚约束的注意事项
 
-在 `XC7A200T3B.xdc` 中我们可以看到，由于 `PAD_JTAG_TCLK` 属于时钟信号，但未接入全局时钟信号网，因此需要添加指令：
+在 `XC7A200T3B.xdc` 中可以看到，由于 `PAD_JTAG_TCLK` 属于时钟信号，但未接入全局时钟信号网，因此需要添加指令：
 ```
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets PAD_JTAG_TCLK]
 ```
