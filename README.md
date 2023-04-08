@@ -123,14 +123,14 @@ clk_wiz  x_clk_wiz (
   |---------------|-----------------------|
   | PIN_EHS       |     全局输入时钟 20MHz  |
   | PAD_MCURST    |     全局复位           |
-  | PAD_JTAG_TCLK |     JTAG               |
-  | PAD_JTAG_TMS  |     JTAG              |
+  | PAD_JTAG_TCLK |     CK-LINK TCK 端口   |
+  | PAD_JTAG_TMS  |     CK-LINK TMS 端口   |
 
   * GPIO：32 个；
   * PWM：13 个；
   * USI：3 组；
 
-在 `../doc/wujian100_open Userguide v1.0.docx` 中列出了各端口的定义，你需要按照一定规则约束端口，例如 `UART`。
+在 `../doc/wujian100_open Userguide v1.0.docx` 中列出了各端口的定义，你需要按照一定规则约束用于通信或其他特定功能性的端口，例如 `UART` 和 `I2C`。
 
 ### 管脚约束的注意事项
 
