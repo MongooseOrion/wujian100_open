@@ -11,6 +11,7 @@
 
   * CKLINK 调试器
   * 能够连接 `TCK` 和 `TMS` 端口的排线
+  * 安装应用程序 `CSkyDebugServer` 和 `CDK`
 
 ## 文件夹结构
 
@@ -157,3 +158,28 @@ define_attribute {n:x_PAD_JTAG_TCLK.OD} {PAP_CLOCK_DEDICATED_ROUTE} {FALSE}
 define_attribute {n:x_PAD_JTAG_TCLK.OEN} {PAP_CLOCK_DEDICATED_ROUTE} {FALSE}
 ```
 即可解决错误。
+
+## 软件侧的准备
+
+在将比特流文件下载进入开发板后，确保端口 `PAD_JTAG_TCLK` 和 `PAD_JTAG_TMS` 对应的硬件端口与 CK-LINK 调试器的 `TCK` 和 `TMS` 端口连接正确。连接电脑后，打开 CSkyDebugServer 应用程序，如果核心正常运行，应该出现下述内容：
+```
+C-SKY: CKLink_Lite_V2, App_ver 2.15, Bit_ver null, Clock 2526.316KHz,
+       2-wire, With DDC, Cache Flush On.
++--  CPU 0  --+
+C-SKY CPU INFO:
+	WORD[0]: [Memory Address]
+	WORD[1]: [Memory Address]
+	WORD[2]: [Memory Address]
+	MARCHID: [Memory Address]
+	MISA   : [Memory Address]
+Target Chip Info:
+	CPU Type is E902, in LITTLE Endian.
+	MISA: (RV32ECM, Imp M-mode)
+
+GDB connect command for CPU 0:
+	target remote [IP Address]
+```
+
+如果显示 `No target connected now`，则说明 wujian100 核心未正常部署。
+
+如果如果核心正常运行，则你可以利用 CDK 进行相应的处理器应用程序开发工作。
